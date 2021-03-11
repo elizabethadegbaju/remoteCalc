@@ -6,5 +6,5 @@ omit =
   *tests/*,
   *urls.py,
   *wsgi/*,
-  *venv/*
+  *env/*
   manage.py
