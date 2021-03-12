@@ -5,6 +5,39 @@
  A simple web service to implement a calculator
 
 ### Deployment Process
+## How it works
+The service offers an endpoint that reads a string input and parses it. 
+it decodes the base64 encoding and interprets it by breaking it down into
+ smaller statements and solved following the order of precedence.
+It returns either an HTTP error code, or a solution to the calculation in JSON
+ form.
+
+An example calculus query:
+Original query: *2 * (23/(33))- 23 * (23)*
+With encoding: *MiAqICgyMy8oMyozKSktIDIzICogKDIqMyk*
+
+### API Description
+Endpoint: ```GET``` /calculus?query=[input]
+The input is a UTF-8 with BASE64 encoding
+Return:
+On success: JSON response of format: 
+```json
+{ 
+    "error": false, 
+    "result": 546 
+}
+```
+On error: JSON response of format: 
+```json
+{
+    "error": true,
+    "message": "string"
+}
+```
+
+Supported operations: + - * / ( )
+
+## Deployment Process
  - A github repository was created for the application locally and published online.
  - Tests for the application are executed using Pytest. Configuration can be
   found in ```pytest.ini``` file in the root directory. 
