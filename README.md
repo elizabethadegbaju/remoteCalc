@@ -3,8 +3,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/elizabethadegbaju/remoteCalc/badge.svg?t=sdwVRu)](https://coveralls.io/github/elizabethadegbaju/remoteCalc)
 
  A simple web service to implement a calculator
+ A simple web service to implement a calculator built using Python/Django
 
-### Deployment Process
 ## How it works
 The service offers an endpoint that reads a string input and parses it. 
 it decodes the base64 encoding and interprets it by breaking it down into
