@@ -27,8 +27,17 @@ class ApiTestCase(APITestCase):
         assert response.data["message"] == "Contains prohibited operators"
 
     def test_api_response_success(self):
-        request = self.factory.get(self.url, {"query": "Misy"})
+        request = self.factory.get(self.url, {
+            "query": "MiAqICgyMy8oMzMpKS0gMjMgKiAoMjMp"})
         response = calculus(request)
         assert response.status_code == 200
         assert response.data["error"] is False
-        assert response.data["result"] == "2+2"
+        assert int(response.data["result"]) == -527
+
+    def test_api_response_deeply_nested(self):
+        request = self.factory.get(self.url, {
+            "query": "MiAqICgyMy8oMzMrNTAtMTAwKDYwKjIpKSktIDIzICogKDIzKQ"})
+        response = calculus(request)
+        assert response.status_code == 200
+        assert response.data["error"] is False
+        assert int(response.data["result"]) == -528

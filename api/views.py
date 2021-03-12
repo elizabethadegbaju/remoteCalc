@@ -1,6 +1,7 @@
 """api views"""
 
 import base64
+import re
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -9,6 +10,8 @@ from rest_framework.response import Response
 @api_view(('GET',))
 def calculus(request):
     """
+    API view to decode base64 utf-8 string, compute it and send back a
+    suitable response.
 
     :param request:
     :return:
@@ -17,22 +20,27 @@ def calculus(request):
     try:
         query = request.GET.get("query", default="")
         query = check_padding(query)
-        expression = decode(query)
+
+        e = re.compile(r"\s+")
+        expression = e.sub("", decode(query))
+
+        print(expression)
+
         unwanted_characters = filter_unwanted_characters(expression)
         if not unwanted_characters:
-            return Response(data={"error": False, "result": expression})
+            result = interpret(expression)
+            return Response(data={"error": False, "result": result})
         else:
             return Response(
                 data={"error": True,
                       "message": "Contains prohibited operators"})
     except Exception as error:
-        return Response(
-            data={"error": True, "message": str(error)})
+        return Response(data={"error": True, "message": str(error)})
 
 
 def filter_unwanted_characters(expression):
     """
-    check it there are unwanted characters and proceed to solve
+    Check it there are unwanted characters in the decoded expression.
 
     :param expression:
     :return: string
@@ -47,7 +55,7 @@ def filter_unwanted_characters(expression):
 
 def decode(query):
     """
-    decode to utf-8 string
+    Decode query to utf-8 string.
 
     :param query:
     :return: expression
@@ -59,7 +67,7 @@ def decode(query):
 
 def check_padding(query):
     """
-    check for missing padding in base64 encoding and fill it up with "="
+    Check for missing padding in base64 encoding and fill it up with "=".
 
     :param query:
     :return: query
@@ -69,3 +77,117 @@ def check_padding(query):
     if missing_padding:
         query += "=" * (4 - missing_padding)
     return query
+
+
+def solve_matched_parenthesis(expression):
+    """
+    Recursively solve expressions in matched parenthesis.
+
+    :param expression:
+    :return: expression
+    """
+    if ")" in expression:
+        end = expression.find(")")
+        start = max([index for index, char in enumerate(expression[:end]) if
+                     char == "("])
+        first_half = expression[:start]
+        print(first_half)
+        if not (first_half == "" or first_half.endswith(
+                "+") or first_half.endswith("-") or first_half.endswith(
+                "*") or first_half.endswith("/")):
+            expression = solve_matched_parenthesis(
+                expression[:start] + "*" + str(
+                    interpret(expression[start + 1:end])) + expression[
+                                                            end + 1:])
+            print(expression)
+        else:
+            expression = solve_matched_parenthesis(expression[:start] + str(
+                interpret(expression[start + 1:end])) + expression[end + 1:])
+            print(expression)
+    return expression
+
+
+def is_number(expression):
+    """
+    Check if the expression can be treated as a numerical value.
+
+    :param expression:
+    :return: boolean
+    """
+    try:
+        float(expression)
+        return True
+    except ValueError:
+        return False
+
+
+def interpret(expression):
+    """
+    Interpret the expression according to operator precedence and return
+    the solved value.
+
+    :param expression:
+    :return:
+    """
+    if is_number(expression):
+        return float(expression)
+
+    expression = solve_matched_parenthesis(expression)
+    statements = split_expression(expression)
+
+    if statements[0].count("(") != statements[0].count(")"):
+        nested_level = statements[0].count("(") - statements[0].count(")")
+        position = len(statements[0])
+        for statement in statements[1:]:
+            if "(" in statement:
+                nested_level += statement.count("(")
+            if ")" in statement:
+                nested_level -= statement.count(")")
+            position += len(statement) + 1
+            if nested_level == 0:
+                break
+    else:
+        position = len(statements[0])
+
+    left_operand = expression[:position]
+    right_operand = expression[position + 1:]
+    operator = expression[position]
+
+    try:
+        if right_operand == "":
+            return left_operand
+        if operator == "+":
+            return interpret(left_operand) + interpret(right_operand)
+        elif operator == "-":
+            return interpret(left_operand) - interpret(right_operand)
+        elif operator == "*":
+            return interpret(left_operand) * interpret(right_operand)
+        elif operator == "/":
+            denominator = interpret(right_operand)
+            if denominator == 0 or None:
+                return None
+            else:
+                return interpret(left_operand) / interpret(right_operand)
+    except TypeError:
+        # one of the operands is a string because there remains an operator
+        # after splitting e.g "23/(2+2)" becomes "23/" "4" after resolving
+        return interpret(str(left_operand) + str(right_operand))
+    return None
+
+
+def split_expression(expression):
+    """
+    Split the given expression into atomic statements.
+
+    :param expression:
+    :return: statements
+    """
+    if "-" in expression:
+        statements = re.compile(r'[-]').split(expression)
+    elif "+" in expression:
+        statements = re.compile(r'[+]').split(expression)
+    elif "/" in expression:
+        statements = re.compile(r'[/]').split(expression)
+    else:
+        statements = re.compile(r'[*]').split(expression)
+    return statements
