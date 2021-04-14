@@ -119,8 +119,7 @@ def get_numerical_value(expression):
         return get_numerical_value(new_expression)
     else:
         try:
-            float(expression)
-            return expression
+            return float(expression)
         except ValueError:
             return None
 
