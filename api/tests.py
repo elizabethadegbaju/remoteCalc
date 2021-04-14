@@ -41,3 +41,11 @@ class ApiTestCase(APITestCase):
         assert response.status_code == 200
         assert response.data["error"] is False
         assert int(response.data["result"]) == -528
+        
+    def test_api_single_value_special_conditions(self):
+        request = self.factory.get(self.url, {
+            "query": "KCgoKC0xMCkpKSk="})
+        response = calculus(request)
+        assert response.status_code == 200
+        assert response.data["error"] is False
+        assert int(response.data["result"]) == -10
