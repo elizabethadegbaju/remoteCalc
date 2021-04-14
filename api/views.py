@@ -62,7 +62,7 @@ def decode(query):
     """
 
     expression = base64.b64decode(query).decode('utf-8')
-    return expression
+    return expression.strip()
 
 
 def check_padding(query):
@@ -94,7 +94,7 @@ def solve_matched_parenthesis(expression):
         print(first_half)
         if not (first_half == "" or first_half.endswith(
                 "+") or first_half.endswith("-") or first_half.endswith(
-                "*") or first_half.endswith("/")):
+            "*") or first_half.endswith("/")):
             expression = solve_matched_parenthesis(
                 expression[:start] + "*" + str(
                     interpret(expression[start + 1:end])) + expression[
@@ -107,18 +107,22 @@ def solve_matched_parenthesis(expression):
     return expression
 
 
-def is_number(expression):
+def get_numerical_value(expression):
     """
-    Check if the expression can be treated as a numerical value.
+    Recursively check if the expression can be treated as a numerical value.
 
     :param expression:
     :return: boolean
     """
-    try:
-        float(expression)
-        return True
-    except ValueError:
-        return False
+    if expression.startswith("(") and expression.endswith(")") and (len(expression) > 2):
+        new_expression = expression[1:-1]
+        return get_numerical_value(new_expression)
+    else:
+        try:
+            float(expression)
+            return expression
+        except ValueError:
+            return None
 
 
 def interpret(expression):
@@ -129,8 +133,9 @@ def interpret(expression):
     :param expression:
     :return:
     """
-    if is_number(expression):
-        return float(expression)
+    number = get_numerical_value(expression)
+    if number is not None:
+        return number
 
     expression = solve_matched_parenthesis(expression)
     statements = split_expression(expression)
