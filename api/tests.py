@@ -16,13 +16,13 @@ class ApiTestCase(APITestCase):
         request = self.factory.get(self.url,
                                    {"query": "this is meant to fail"})
         response = calculus(request)
-        assert response.status_code == 200
+        assert response.status_code == 400
         assert response.data["error"] is True
 
     def test_api_response_error(self):
         request = self.factory.get(self.url, {"query": "MisyJA"})
         response = calculus(request)
-        assert response.status_code == 200
+        assert response.status_code == 400
         assert response.data["error"] is True
         assert response.data["message"] == "Contains prohibited operators"
 
