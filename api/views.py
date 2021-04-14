@@ -33,9 +33,9 @@ def calculus(request):
         else:
             return Response(
                 data={"error": True,
-                      "message": "Contains prohibited operators"})
+                      "message": "Contains prohibited operators"}, status=400)
     except Exception as error:
-        return Response(data={"error": True, "message": str(error)})
+        return Response(data={"error": True, "message": str(error)}, status=400)
 
 
 def filter_unwanted_characters(expression):
