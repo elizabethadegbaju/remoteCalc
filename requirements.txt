@@ -7,7 +7,7 @@ colorama==0.4.4
 coverage==5.5
 coveralls==3.0.1
 dj-database-url==0.5.0
-Django==3.1.8
+Django==3.1.14
 django-decouple==2.1
 django-heroku==0.3.1
 djangorestframework==3.12.2
