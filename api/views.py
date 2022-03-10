@@ -171,7 +171,7 @@ def interpret(expression):
             if denominator == 0 or None:
                 return None
             else:
-                return interpret(left_operand) / interpret(right_operand)
+                return interpret(left_operand) / denominator
     except TypeError:
         # one of the operands is a string because there remains an operator
         # after splitting e.g "23/(2+2)" becomes "23/" "4" after resolving
